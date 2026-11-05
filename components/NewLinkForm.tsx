@@ -9,9 +9,11 @@ type Props = {
 
 export default function NewLinkForm({ folders }: Props) {
   return (
-    <section className="mx-auto w-full max-w-xl">
-      <h1 className="mb-6 text-xl font-bold">새 링크 추가</h1>
-      <form className="flex flex-col gap-5">
+    <section className="w-full">
+      <h1 className="mb-8 text-[30px] font-bold leading-[1.2] text-[var(--text)]">
+        새 링크 추가
+      </h1>
+      <form className="flex flex-col gap-4 rounded-lg border border-[var(--border)] bg-[var(--card)] p-6">
         <LinkInput />
         <FolderSelect folders={folders} />
         <SaveButton />

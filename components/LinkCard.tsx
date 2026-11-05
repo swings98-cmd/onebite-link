@@ -18,13 +18,15 @@ export default function LinkCard({ link }: Props) {
       href={link.url}
       target="_blank"
       rel="noopener noreferrer"
-      className="flex h-full flex-col gap-2 rounded-xl border border-zinc-200 p-4 transition-shadow hover:shadow-md dark:border-zinc-800 dark:hover:border-zinc-700"
+      className="card-hover flex h-full flex-col gap-2 rounded-lg border border-[var(--border)] bg-[var(--card)] p-4"
     >
-      <h3 className="truncate font-semibold">{link.title}</h3>
-      <p className="line-clamp-2 text-sm text-zinc-600 dark:text-zinc-400">
+      <h3 className="truncate text-base font-semibold text-[var(--text)]">
+        {link.title}
+      </h3>
+      <p className="line-clamp-2 text-sm leading-[1.4] text-[var(--text-sub)]">
         {link.description}
       </p>
-      <span className="mt-auto truncate pt-2 text-xs text-zinc-500">
+      <span className="mt-auto w-fit max-w-full truncate rounded-[4px] bg-[var(--hover-bg)] px-2 py-0.5 text-[13px] text-[var(--text)]">
         {getHostname(link.url)}
       </span>
     </a>

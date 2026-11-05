@@ -4,7 +4,7 @@ export default function NewLinkButton() {
   return (
     <Link
       href="/new"
-      className="inline-flex h-9 items-center gap-1.5 rounded-lg bg-foreground px-3.5 text-sm font-medium text-background transition-opacity hover:opacity-80"
+      className="btn-primary inline-flex items-center gap-1.5 rounded-[6px] bg-[var(--accent)] px-4 py-1.5 text-sm font-medium text-white"
     >
       <span aria-hidden className="text-base leading-none">
         +

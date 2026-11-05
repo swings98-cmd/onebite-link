@@ -7,7 +7,7 @@ type Props = {
 
 export default function LinkGrid({ links }: Props) {
   return (
-    <ul className="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-3 2xl:grid-cols-4">
+    <ul className="grid grid-cols-1 gap-4 sm:grid-cols-2">
       {links.map((link) => (
         <li key={link.id}>
           <LinkCard link={link} />

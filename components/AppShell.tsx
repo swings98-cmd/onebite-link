@@ -24,7 +24,9 @@ export default function AppShell({
           allActive={allActive}
           activeFolderId={activeFolderId}
         />
-        <main className="flex-1 overflow-y-auto p-6">{children}</main>
+        <main className="flex-1 overflow-y-auto px-6 pb-10 pt-10">
+          <div className="mx-auto w-full max-w-[720px]">{children}</div>
+        </main>
       </div>
     </div>
   );

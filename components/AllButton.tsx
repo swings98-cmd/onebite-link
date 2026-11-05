@@ -10,14 +10,14 @@ export default function AllButton({ count, active = false }: Props) {
     <Link
       href="/"
       aria-current={active ? "page" : undefined}
-      className={`flex h-10 w-full items-center justify-between rounded-lg px-3 text-sm font-semibold transition-colors ${
-        active
-          ? "bg-foreground text-background"
-          : "hover:bg-zinc-100 dark:hover:bg-zinc-900"
+      className={`nav-hover flex h-9 w-full items-center justify-between rounded-[6px] px-3 text-sm font-semibold text-[var(--text)] ${
+        active ? "bg-[var(--hover-bg)]" : ""
       }`}
     >
-      <span>ALL</span>
-      <span className="text-xs font-normal opacity-70">{count}</span>
+      <span>전체</span>
+      <span className="text-[13px] font-normal text-[var(--text-sub)]">
+        {count}
+      </span>
     </Link>
   );
 }

@@ -16,7 +16,7 @@ export default function Sidebar({
   activeFolderId,
 }: Props) {
   return (
-    <aside className="hidden w-60 shrink-0 flex-col gap-4 overflow-y-auto border-r border-zinc-200 p-4 dark:border-zinc-800 md:flex">
+    <aside className="hidden w-60 shrink-0 flex-col gap-6 overflow-y-auto border-r border-[var(--border)] bg-[var(--bg)] p-4 md:flex">
       <AllButton count={totalCount} active={allActive} />
       <FolderList folders={folders} activeFolderId={activeFolderId} />
     </aside>

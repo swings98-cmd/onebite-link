@@ -1,26 +1,69 @@
 @import "tailwindcss";
 
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
-}
-
-@theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
-}
-
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
+  --bg: #f7f7f5;
+  --card: #ffffff;
+  --text: #37352f;
+  /* 가이드 #9B9A97은 배경 대비 3:1 미만이라 어둡게 조정 (≈4.1:1) */
+  --text-sub: #787774;
+  --placeholder: #8f8e8a;
+  --border: #e3e3e0;
+  /* 흰 글씨 대비 3:1 확보를 위해 가이드 #2EAADC 보다 어둡게 조정 (≈3.8:1) */
+  --accent: #1d8db8;
+  --accent-hover: #187aa0;
+  --hover-bg: #f1f1ef;
+  --header-bg: rgba(247, 247, 245, 0.8);
+  --error: #eb5757;
+  --success: #4dab9a;
 }
 
 body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: var(--font-sans), Arial, Helvetica, sans-serif;
+  background: var(--bg);
+  color: var(--text);
+  font-family:
+    -apple-system, BlinkMacSystemFont, "Apple SD Gothic Neo", "Segoe UI",
+    sans-serif;
+  font-size: 16px;
+  line-height: 1.6;
+  -webkit-font-smoothing: antialiased;
+}
+
+/* ---------- hover / 상태 클래스 (서버 컴포넌트에서도 사용 가능) ---------- */
+
+.nav-hover {
+  transition: background-color 0.15s ease;
+}
+.nav-hover:hover {
+  background: var(--hover-bg);
+}
+
+.card-hover {
+  transition:
+    background-color 0.15s ease,
+    border-color 0.15s ease;
+}
+.card-hover:hover {
+  background: var(--bg);
+}
+
+.btn-primary {
+  transition: background-color 0.15s ease;
+}
+.btn-primary:hover:not(:disabled) {
+  background: var(--accent-hover);
+}
+
+.field {
+  transition: border-color 0.15s ease;
+}
+.field::placeholder {
+  color: var(--placeholder);
+}
+.field:focus {
+  border-color: var(--accent);
+  outline: none;
+}
+
+.link-hover:hover {
+  text-decoration: underline;
 }

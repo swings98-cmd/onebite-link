@@ -9,7 +9,7 @@ export default function LinkInput() {
         type="url"
         required
         placeholder="https://example.com"
-        className="h-10 rounded-lg border border-zinc-300 bg-transparent px-3 text-sm outline-none transition-colors placeholder:text-zinc-400 focus:border-foreground dark:border-zinc-700"
+        className="field rounded-[6px] border border-[var(--border)] bg-[var(--card)] px-3 py-2 text-base text-[var(--text)]"
       />
     </FormField>
   );
