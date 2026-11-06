@@ -2,9 +2,11 @@
 
 import { useEffect, useRef, useState } from "react";
 import { useFormStatus } from "react-dom";
-import { createFolder } from "@/app/_actions/folder";
+import { createFolder, renameFolder } from "@/app/_actions/folder";
 
 type Props = {
+  /** 있으면 이름 수정 모드, 없으면 새 폴더 모드 */
+  folder?: { id: string; name: string };
   onClose: () => void;
 };
 
@@ -31,18 +33,23 @@ function ModalActions({ canSave, onCancel }: { canSave: boolean; onCancel: () =>
   );
 }
 
-export default function NewFolderModal({ onClose }: Props) {
+export default function FolderFormModal({ folder, onClose }: Props) {
+  const isEdit = folder !== undefined;
   const dialogRef = useRef<HTMLDialogElement>(null);
-  const [name, setName] = useState("");
+  const [name, setName] = useState(folder?.name ?? "");
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
     const dialog = dialogRef.current;
     if (dialog && !dialog.open) dialog.showModal();
+    // 수정 모드에서는 기존 이름을 바로 덮어쓸 수 있게 선택해 둔다.
+    dialog?.querySelector("input")?.select();
   }, []);
 
   async function handleAction(formData: FormData) {
-    const result = await createFolder(formData);
+    const result = folder
+      ? await renameFolder(folder.id, formData)
+      : await createFolder(formData);
     if (result.error) {
       setError(result.error);
       return;
@@ -53,7 +60,7 @@ export default function NewFolderModal({ onClose }: Props) {
   return (
     <dialog
       ref={dialogRef}
-      aria-labelledby="new-folder-title"
+      aria-labelledby="folder-form-title"
       onClose={onClose}
       onClick={(e) => {
         // 백드롭(dialog 자신) 클릭 시 닫기
@@ -63,10 +70,10 @@ export default function NewFolderModal({ onClose }: Props) {
     >
       <form action={handleAction}>
         <h2
-          id="new-folder-title"
+          id="folder-form-title"
           className="mb-4 text-xl font-semibold leading-[1.3]"
         >
-          새 폴더
+          {isEdit ? "폴더 이름 수정" : "새 폴더"}
         </h2>
         <label
           htmlFor="folder-name"
@@ -103,7 +110,9 @@ export default function NewFolderModal({ onClose }: Props) {
             {error}
           </p>
         )}
-        <ModalActions canSave={name.trim().length > 0} onCancel={onClose} />
+        <ModalActions canSave={
+            name.trim().length > 0 && (!isEdit || name.trim() !== folder.name)
+          } onCancel={onClose} />
       </form>
     </dialog>
   );

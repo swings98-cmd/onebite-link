@@ -1,6 +1,7 @@
 import Link from "next/link";
 import type { Folder } from "@/app/_lib/types";
 import DeleteFolderButton from "./DeleteFolderButton";
+import EditFolderButton from "./EditFolderButton";
 
 type Props = {
   folder: Folder;
@@ -22,7 +23,7 @@ export default function FolderItem({ folder, active = false }: Props) {
           active ? "font-semibold" : ""
         }`}
       >
-        <span className="flex items-center gap-2 truncate">
+        <span className="folder-label flex min-w-0 items-center gap-2 truncate">
           <span aria-hidden>📁</span>
           <span className="truncate">{folder.name}</span>
         </span>
@@ -30,6 +31,7 @@ export default function FolderItem({ folder, active = false }: Props) {
           {folder.count}
         </span>
       </Link>
+      <EditFolderButton folder={folder} />
       <DeleteFolderButton
         folderId={folder.id}
         folderName={folder.name}

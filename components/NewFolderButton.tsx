@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import NewFolderModal from "./NewFolderModal";
+import FolderFormModal from "./FolderFormModal";
 
 export default function NewFolderButton() {
   const [open, setOpen] = useState(false);
@@ -15,7 +15,7 @@ export default function NewFolderButton() {
       >
         <span aria-hidden>📁</span>새 폴더
       </button>
-      {open && <NewFolderModal onClose={() => setOpen(false)} />}
+      {open && <FolderFormModal onClose={() => setOpen(false)} />}
     </>
   );
 }

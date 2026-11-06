@@ -68,20 +68,24 @@ body {
   background: var(--error-hover);
 }
 
-/* 사이드바 폴더 행: hover 시 개수 대신 삭제(휴지통) 버튼 표시 */
-.folder-delete {
+/* 사이드바 폴더 행: hover 시 개수 대신 수정(연필)·삭제(휴지통) 버튼 표시 */
+.folder-action {
   opacity: 0;
   transition:
     opacity 0.15s ease,
     background-color 0.15s ease,
     color 0.15s ease;
 }
-.folder-row:hover .folder-delete,
-.folder-delete:focus-visible {
+.folder-row:hover .folder-action,
+.folder-action:focus-visible {
   opacity: 1;
 }
 .folder-row:hover .folder-count {
   visibility: hidden;
+}
+/* hover 시 오른쪽에 아이콘 버튼 2개(수정·삭제)가 놓이므로 이름이 겹치지 않게 비워 둔다 */
+.folder-row:hover .folder-label {
+  margin-right: 36px;
 }
 .btn-icon:hover {
   background: var(--border);
