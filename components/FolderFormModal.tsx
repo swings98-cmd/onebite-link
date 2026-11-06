@@ -38,6 +38,8 @@ export default function FolderFormModal({ folder, onClose }: Props) {
   const dialogRef = useRef<HTMLDialogElement>(null);
   const [name, setName] = useState(folder?.name ?? "");
   const [error, setError] = useState<string | null>(null);
+  // 저장 중에 버튼을 연타해도 요청이 한 번만 나가도록 막는다.
+  const submittingRef = useRef(false);
 
   useEffect(() => {
     const dialog = dialogRef.current;
@@ -47,9 +49,16 @@ export default function FolderFormModal({ folder, onClose }: Props) {
   }, []);
 
   async function handleAction(formData: FormData) {
-    const result = folder
-      ? await renameFolder(folder.id, formData)
-      : await createFolder(formData);
+    if (submittingRef.current) return;
+    submittingRef.current = true;
+    let result;
+    try {
+      result = folder
+        ? await renameFolder(folder.id, formData)
+        : await createFolder(formData);
+    } finally {
+      submittingRef.current = false;
+    }
     if (result.error) {
       setError(result.error);
       return;
