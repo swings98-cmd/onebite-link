@@ -1,7 +1,7 @@
 "use server";
 
 import { revalidatePath } from "next/cache";
-import { folders } from "../_lib/mock-data";
+import { folders, links } from "../_lib/mock-data";
 
 const MAX_NAME_LENGTH = 30;
 
@@ -26,6 +26,23 @@ export async function createFolder(
   folders.push({ id: crypto.randomUUID().slice(0, 8), name, count: 0 });
 
   // 사이드바(AppShell)가 모든 페이지에서 폴더 목록을 읽으므로 전체 레이아웃을 갱신한다.
+  revalidatePath("/", "layout");
+  return {};
+}
+
+export async function deleteFolder(id: string): Promise<CreateFolderResult> {
+  const index = folders.findIndex((folder) => folder.id === id);
+  if (index === -1) {
+    return { error: "이미 삭제되었거나 존재하지 않는 폴더예요." };
+  }
+
+  folders.splice(index, 1);
+
+  // 폴더에 속해 있던 링크는 갈 곳이 없어지므로 함께 삭제한다.
+  for (let i = links.length - 1; i >= 0; i--) {
+    if (links[i].folderId === id) links.splice(i, 1);
+  }
+
   revalidatePath("/", "layout");
   return {};
 }

@@ -14,6 +14,7 @@
   --hover-bg: #f1f1ef;
   --header-bg: rgba(247, 247, 245, 0.8);
   --error: #eb5757;
+  --error-hover: #d94444;
   --success: #4dab9a;
 }
 
@@ -58,6 +59,33 @@ body {
 }
 .btn-secondary:hover {
   background: var(--hover-bg);
+}
+
+.btn-danger {
+  transition: background-color 0.15s ease;
+}
+.btn-danger:hover:not(:disabled) {
+  background: var(--error-hover);
+}
+
+/* 사이드바 폴더 행: hover 시 개수 대신 삭제(휴지통) 버튼 표시 */
+.folder-delete {
+  opacity: 0;
+  transition:
+    opacity 0.15s ease,
+    background-color 0.15s ease,
+    color 0.15s ease;
+}
+.folder-row:hover .folder-delete,
+.folder-delete:focus-visible {
+  opacity: 1;
+}
+.folder-row:hover .folder-count {
+  visibility: hidden;
+}
+.btn-icon:hover {
+  background: var(--border);
+  color: var(--text);
 }
 
 .field {
