@@ -1,6 +1,8 @@
 "use server";
 
 import { revalidatePath } from "next/cache";
+import { cookies } from "next/headers";
+import { createClient } from "@/utils/supabase/server";
 import {
   fetchOpenGraph,
   OpenGraphError,
@@ -20,8 +22,8 @@ export async function addLink(formData: FormData): Promise<AddLinkResult> {
     return { error: "http:// 또는 https:// 로 시작하는 올바른 주소를 입력해주세요." };
   }
 
-  const folder = folders.find((f) => f.id === folderId);
-  if (!folder) {
+  const folderIdNumber = Number(folderId);
+  if (typeof folderId !== "string" || !folderId || !Number.isInteger(folderIdNumber)) {
     return { error: "폴더를 선택해주세요." };
   }
 
@@ -43,18 +45,26 @@ export async function addLink(formData: FormData): Promise<AddLinkResult> {
     };
   }
 
-  links.unshift({
-    id: crypto.randomUUID(),
-    title: og.title,
+  const supabase = createClient(await cookies());
+  const { error } = await supabase.from("links").insert({
     url: og.url,
+    title: og.title,
     description: og.description,
-    thumbnail: og.image ?? undefined,
-    folderId: folder.id,
+    thumbnail_url: og.image,
+    folder_id: folderIdNumber,
   });
-  folder.count += 1;
+  if (error) {
+    // 23503: 선택한 폴더가 그 사이에 삭제된 경우(외래키 위반)
+    return {
+      error:
+        error.code === "23503"
+          ? "존재하지 않는 폴더예요."
+          : "링크를 추가하지 못했어요. 잠시 후 다시 시도해주세요.",
+    };
+  }
 
   revalidatePath("/", "layout");
-  return { folderId: folder.id };
+  return { folderId: String(folderIdNumber) };
 }
 
 export async function deleteLink(id: string): Promise<{ error?: string }> {

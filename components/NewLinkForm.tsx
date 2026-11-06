@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useTransition } from "react";
+import { useRef, useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
 import { addLink } from "@/app/_actions/link";
 import type { Folder } from "@/app/_lib/types";
@@ -16,19 +16,27 @@ export default function NewLinkForm({ folders }: Props) {
   const router = useRouter();
   const [pending, startTransition] = useTransition();
   const [error, setError] = useState<string | null>(null);
+  // 저장 중에 버튼을 연타해도 링크가 한 번만 추가되도록 막는다.
+  const submittingRef = useRef(false);
 
   function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
+    if (submittingRef.current) return;
+    submittingRef.current = true;
     const formData = new FormData(e.currentTarget);
     setError(null);
 
     startTransition(async () => {
-      const result = await addLink(formData);
-      if (result.error) {
-        setError(result.error);
-        return;
+      try {
+        const result = await addLink(formData);
+        if (result.error) {
+          setError(result.error);
+          return;
+        }
+        router.push(`/folder/${result.folderId}`);
+      } finally {
+        submittingRef.current = false;
       }
-      router.push(`/folder/${result.folderId}`);
     });
   }
 

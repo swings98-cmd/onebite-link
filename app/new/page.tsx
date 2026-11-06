@@ -1,11 +1,19 @@
+import { Suspense } from "react";
 import AppShell from "@/components/AppShell";
 import NewLinkForm from "@/components/NewLinkForm";
-import { folders } from "../_lib/mock-data";
+import { fetchFolders } from "../_lib/data";
+
+async function NewLinkFormWithFolders() {
+  const folders = await fetchFolders();
+  return <NewLinkForm folders={folders} />;
+}
 
 export default function NewLinkPage() {
   return (
     <AppShell allActive={false}>
-      <NewLinkForm folders={folders} />
+      <Suspense fallback={null}>
+        <NewLinkFormWithFolders />
+      </Suspense>
     </AppShell>
   );
 }
