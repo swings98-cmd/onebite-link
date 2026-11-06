@@ -9,7 +9,6 @@ import {
   parseHttpUrl,
   type OpenGraphData,
 } from "../_lib/open-graph";
-import { folders, links } from "../_lib/mock-data";
 
 export type AddLinkResult = { error?: string; folderId?: string };
 
@@ -68,14 +67,23 @@ export async function addLink(formData: FormData): Promise<AddLinkResult> {
 }
 
 export async function deleteLink(id: string): Promise<{ error?: string }> {
-  const index = links.findIndex((link) => link.id === id);
-  if (index === -1) {
+  const linkId = Number(id);
+  if (!Number.isInteger(linkId)) {
     return { error: "이미 삭제되었거나 존재하지 않는 링크예요." };
   }
 
-  const [removed] = links.splice(index, 1);
-  const folder = folders.find((f) => f.id === removed.folderId);
-  if (folder) folder.count = Math.max(0, folder.count - 1);
+  const supabase = createClient(await cookies());
+  const { data: deleted, error } = await supabase
+    .from("links")
+    .delete()
+    .eq("id", linkId)
+    .select("id");
+  if (error) {
+    return { error: "링크를 삭제하지 못했어요. 잠시 후 다시 시도해주세요." };
+  }
+  if (deleted.length === 0) {
+    return { error: "이미 삭제되었거나 존재하지 않는 링크예요." };
+  }
 
   revalidatePath("/", "layout");
   return {};
