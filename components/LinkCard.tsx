@@ -1,4 +1,5 @@
 import type { LinkItem } from "@/app/_lib/types";
+import LinkThumbnail from "./LinkThumbnail";
 
 type Props = {
   link: LinkItem;
@@ -20,6 +21,7 @@ export default function LinkCard({ link }: Props) {
       rel="noopener noreferrer"
       className="card-hover flex h-full flex-col gap-2 rounded-lg border border-[var(--border)] bg-[var(--card)] p-4"
     >
+      {link.thumbnail && <LinkThumbnail src={link.thumbnail} />}
       <h3 className="truncate text-base font-semibold text-[var(--text)]">
         {link.title}
       </h3>
