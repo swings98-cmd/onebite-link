@@ -3,7 +3,6 @@
 import { revalidatePath } from "next/cache";
 import { cookies } from "next/headers";
 import { createClient } from "@/utils/supabase/server";
-import { folders, links } from "../_lib/mock-data";
 
 const MAX_NAME_LENGTH = 30;
 
@@ -98,16 +97,23 @@ export async function renameFolder(
 }
 
 export async function deleteFolder(id: string): Promise<CreateFolderResult> {
-  const index = folders.findIndex((folder) => folder.id === id);
-  if (index === -1) {
+  const folderId = Number(id);
+  if (!Number.isInteger(folderId)) {
     return { error: "이미 삭제되었거나 존재하지 않는 폴더예요." };
   }
 
-  folders.splice(index, 1);
+  const supabase = createClient(await cookies());
 
-  // 폴더에 속해 있던 링크는 갈 곳이 없어지므로 함께 삭제한다.
-  for (let i = links.length - 1; i >= 0; i--) {
-    if (links[i].folderId === id) links.splice(i, 1);
+  const { data: deleted, error } = await supabase
+    .from("folders")
+    .delete()
+    .eq("id", folderId)
+    .select("id");
+  if (error) {
+    return { error: "폴더를 삭제하지 못했어요. 잠시 후 다시 시도해주세요." };
+  }
+  if (deleted.length === 0) {
+    return { error: "이미 삭제되었거나 존재하지 않는 폴더예요." };
   }
 
   revalidatePath("/", "layout");
