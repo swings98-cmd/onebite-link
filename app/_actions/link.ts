@@ -88,17 +88,18 @@ export async function updateLink(
   id: string,
   formData: FormData,
 ): Promise<{ error?: string }> {
-  const link = links.find((l) => l.id === id);
-  if (!link) {
+  const linkId = Number(id);
+  if (!Number.isInteger(linkId)) {
     return { error: "존재하지 않는 링크예요." };
   }
 
   const rawTitle = formData.get("title");
   const rawDescription = formData.get("description");
+  const rawFolder = formData.get("folder");
   const title = typeof rawTitle === "string" ? rawTitle.trim() : "";
   const description =
     typeof rawDescription === "string" ? rawDescription.trim() : "";
-  const nextFolder = folders.find((f) => f.id === formData.get("folder"));
+  const folderId = typeof rawFolder === "string" ? Number(rawFolder) : NaN;
 
   if (!title) return { error: "제목을 입력해주세요." };
   if (title.length > MAX_TITLE_LENGTH) {
@@ -109,17 +110,28 @@ export async function updateLink(
       error: `설명은 ${MAX_DESCRIPTION_LENGTH}자 이내로 입력해주세요.`,
     };
   }
-  if (!nextFolder) return { error: "폴더를 선택해주세요." };
-
-  // 폴더가 바뀌면 양쪽 폴더의 링크 수를 맞춘다.
-  if (nextFolder.id !== link.folderId) {
-    const prevFolder = folders.find((f) => f.id === link.folderId);
-    if (prevFolder) prevFolder.count = Math.max(0, prevFolder.count - 1);
-    nextFolder.count += 1;
-    link.folderId = nextFolder.id;
+  if (!rawFolder || !Number.isInteger(folderId)) {
+    return { error: "폴더를 선택해주세요." };
   }
-  link.title = title;
-  link.description = description;
+
+  const supabase = createClient(await cookies());
+  const { data: updated, error } = await supabase
+    .from("links")
+    .update({ title, description, folder_id: folderId })
+    .eq("id", linkId)
+    .select("id");
+  if (error) {
+    // 23503: 선택한 폴더가 그 사이에 삭제된 경우(외래키 위반)
+    return {
+      error:
+        error.code === "23503"
+          ? "존재하지 않는 폴더예요."
+          : "링크를 수정하지 못했어요. 잠시 후 다시 시도해주세요.",
+    };
+  }
+  if (updated.length === 0) {
+    return { error: "존재하지 않는 링크예요." };
+  }
 
   revalidatePath("/", "layout");
   return {};
