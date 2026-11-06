@@ -1,4 +1,5 @@
 import type { LinkItem } from "@/app/_lib/types";
+import { folders } from "@/app/_lib/mock-data";
 import LinkCard from "./LinkCard";
 
 type Props = {
@@ -10,7 +11,7 @@ export default function LinkGrid({ links }: Props) {
     <ul className="grid grid-cols-1 gap-4 sm:grid-cols-2">
       {links.map((link) => (
         <li key={link.id}>
-          <LinkCard link={link} />
+          <LinkCard link={link} folders={folders} />
         </li>
       ))}
     </ul>

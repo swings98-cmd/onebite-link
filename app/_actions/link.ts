@@ -70,3 +70,47 @@ export async function deleteLink(id: string): Promise<{ error?: string }> {
   revalidatePath("/", "layout");
   return {};
 }
+
+const MAX_TITLE_LENGTH = 200;
+const MAX_DESCRIPTION_LENGTH = 500;
+
+export async function updateLink(
+  id: string,
+  formData: FormData,
+): Promise<{ error?: string }> {
+  const link = links.find((l) => l.id === id);
+  if (!link) {
+    return { error: "존재하지 않는 링크예요." };
+  }
+
+  const rawTitle = formData.get("title");
+  const rawDescription = formData.get("description");
+  const title = typeof rawTitle === "string" ? rawTitle.trim() : "";
+  const description =
+    typeof rawDescription === "string" ? rawDescription.trim() : "";
+  const nextFolder = folders.find((f) => f.id === formData.get("folder"));
+
+  if (!title) return { error: "제목을 입력해주세요." };
+  if (title.length > MAX_TITLE_LENGTH) {
+    return { error: `제목은 ${MAX_TITLE_LENGTH}자 이내로 입력해주세요.` };
+  }
+  if (description.length > MAX_DESCRIPTION_LENGTH) {
+    return {
+      error: `설명은 ${MAX_DESCRIPTION_LENGTH}자 이내로 입력해주세요.`,
+    };
+  }
+  if (!nextFolder) return { error: "폴더를 선택해주세요." };
+
+  // 폴더가 바뀌면 양쪽 폴더의 링크 수를 맞춘다.
+  if (nextFolder.id !== link.folderId) {
+    const prevFolder = folders.find((f) => f.id === link.folderId);
+    if (prevFolder) prevFolder.count = Math.max(0, prevFolder.count - 1);
+    nextFolder.count += 1;
+    link.folderId = nextFolder.id;
+  }
+  link.title = title;
+  link.description = description;
+
+  revalidatePath("/", "layout");
+  return {};
+}
