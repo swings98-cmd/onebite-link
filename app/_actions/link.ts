@@ -56,3 +56,17 @@ export async function addLink(formData: FormData): Promise<AddLinkResult> {
   revalidatePath("/", "layout");
   return { folderId: folder.id };
 }
+
+export async function deleteLink(id: string): Promise<{ error?: string }> {
+  const index = links.findIndex((link) => link.id === id);
+  if (index === -1) {
+    return { error: "이미 삭제되었거나 존재하지 않는 링크예요." };
+  }
+
+  const [removed] = links.splice(index, 1);
+  const folder = folders.find((f) => f.id === removed.folderId);
+  if (folder) folder.count = Math.max(0, folder.count - 1);
+
+  revalidatePath("/", "layout");
+  return {};
+}

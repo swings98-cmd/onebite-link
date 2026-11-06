@@ -87,6 +87,17 @@ body {
 .folder-row:hover .folder-label {
   margin-right: 36px;
 }
+.link-card-action {
+  opacity: 0;
+  transition:
+    opacity 0.15s ease,
+    background-color 0.15s ease,
+    color 0.15s ease;
+}
+.link-card:hover .link-card-action,
+.link-card-action:focus-visible {
+  opacity: 1;
+}
 .btn-icon:hover {
   background: var(--border);
   color: var(--text);
