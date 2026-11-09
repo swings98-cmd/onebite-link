@@ -1,7 +1,11 @@
 "use client";
 
+import { useCallback, useState, useTransition } from "react";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
+import { signIn, signUp } from "@/app/_actions/auth";
 import FormField from "./FormField";
+import Toast from "./Toast";
 
 type Props = {
   mode: "login" | "signup";
@@ -13,14 +17,47 @@ const fieldClass =
 export default function AuthForm({ mode }: Props) {
   const isSignup = mode === "signup";
 
-  // 인증 기능은 아직 구현하지 않는다. 폼이 GET 으로 제출되어
-  // 입력값이 URL 에 노출되지 않도록 기본 제출 동작만 막아 둔다.
+  const router = useRouter();
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [passwordConfirm, setPasswordConfirm] = useState("");
+  const [toast, setToast] = useState<{ id: number; message: string } | null>(
+    null,
+  );
+  const [pending, startTransition] = useTransition();
+
+  const closeToast = useCallback(() => setToast(null), []);
+  const showToast = (message: string) =>
+    setToast({ id: Date.now(), message });
+
+  // 회원가입은 세 입력, 로그인은 이메일·비밀번호가 모두 채워져야 버튼이 활성화된다.
+  const canSubmit = isSignup
+    ? email.trim() !== "" && password !== "" && passwordConfirm !== ""
+    : email.trim() !== "" && password !== "";
+
   function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
+    if (pending) return;
+
+    if (isSignup && password !== passwordConfirm) {
+      showToast("비밀번호가 일치하지 않아요.");
+      return;
+    }
+
+    const formData = new FormData(e.currentTarget);
+    startTransition(async () => {
+      const result = await (isSignup ? signUp : signIn)(formData);
+      if (result.error) {
+        showToast(result.error);
+        return;
+      }
+      router.push("/");
+    });
   }
 
   return (
     <div className="flex min-h-screen items-center justify-center px-6 py-10">
+      {toast && <Toast key={toast.id} message={toast.message} onClose={closeToast} />}
       <div className="flex w-full max-w-[400px] flex-col gap-8">
         <p className="text-center text-[30px] font-bold leading-[1.2] text-[var(--text)]">
           🔖 한입 링크
@@ -36,6 +73,8 @@ export default function AuthForm({ mode }: Props) {
               type="email"
               required
               autoComplete="email"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
               placeholder="example@email.com"
               className={fieldClass}
             />
@@ -47,6 +86,8 @@ export default function AuthForm({ mode }: Props) {
               type="password"
               required
               autoComplete={isSignup ? "new-password" : "current-password"}
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
               placeholder="비밀번호를 입력하세요"
               className={fieldClass}
             />
@@ -59,6 +100,8 @@ export default function AuthForm({ mode }: Props) {
                 type="password"
                 required
                 autoComplete="new-password"
+                value={passwordConfirm}
+                onChange={(e) => setPasswordConfirm(e.target.value)}
                 placeholder="비밀번호를 다시 입력하세요"
                 className={fieldClass}
               />
@@ -66,9 +109,16 @@ export default function AuthForm({ mode }: Props) {
           )}
           <button
             type="submit"
-            className="btn-primary rounded-[6px] bg-[var(--accent)] px-4 py-2 text-sm font-medium text-white"
+            disabled={!canSubmit || pending}
+            className="btn-primary rounded-[6px] bg-[var(--accent)] px-4 py-2 text-sm font-medium text-white disabled:cursor-not-allowed disabled:opacity-40"
           >
-            {isSignup ? "회원가입" : "로그인"}
+            {isSignup
+              ? pending
+                ? "가입하는 중..."
+                : "회원가입"
+              : pending
+                ? "로그인하는 중..."
+                : "로그인"}
           </button>
         </form>
         <p className="text-center text-sm text-[var(--text-sub)]">
