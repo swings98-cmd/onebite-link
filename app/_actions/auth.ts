@@ -1,6 +1,7 @@
 "use server";
 
 import { cookies } from "next/headers";
+import { redirect } from "next/navigation";
 import { createClient } from "@/utils/supabase/server";
 
 const MIN_PASSWORD_LENGTH = 6;
@@ -91,4 +92,10 @@ export async function signIn(formData: FormData): Promise<SignInResult> {
     return { error: toSignInMessage(error.code) };
   }
   return {};
+}
+
+export async function signOut(): Promise<void> {
+  const supabase = createClient(await cookies());
+  await supabase.auth.signOut();
+  redirect("/login");
 }
