@@ -1,6 +1,6 @@
 "use server";
 
-import { cookies } from "next/headers";
+import { cookies, headers } from "next/headers";
 import { redirect } from "next/navigation";
 import { createClient } from "@/utils/supabase/server";
 
@@ -98,4 +98,89 @@ export async function signOut(): Promise<void> {
   const supabase = createClient(await cookies());
   await supabase.auth.signOut();
   redirect("/login");
+}
+
+export type ActionResult = { error?: string };
+
+export async function requestPasswordReset(
+  formData: FormData,
+): Promise<ActionResult> {
+  const rawEmail = formData.get("email");
+  const email = typeof rawEmail === "string" ? rawEmail.trim() : "";
+  if (!email) {
+    return { error: "이메일을 입력해주세요." };
+  }
+
+  // 메일의 링크는 이 앱의 /auth/callback 으로 돌아오고, 거기서 재설정 페이지로 이동한다.
+  const origin = (await headers()).get("origin");
+  if (!origin) {
+    return { error: "요청을 처리하지 못했어요. 잠시 후 다시 시도해주세요." };
+  }
+
+  const supabase = createClient(await cookies());
+  const { error } = await supabase.auth.resetPasswordForEmail(email, {
+    redirectTo: `${origin}/auth/callback?next=/reset-password`,
+  });
+  if (error) {
+    switch (error.code) {
+      case "validation_failed":
+      case "email_address_invalid":
+        return { error: "올바른 이메일 주소를 입력해주세요." };
+      case "over_email_send_rate_limit":
+      case "over_request_rate_limit":
+        return {
+          error: "메일을 너무 자주 요청했어요. 잠시 후 다시 시도해주세요.",
+        };
+      default:
+        return {
+          error: "메일을 보내지 못했어요. 잠시 후 다시 시도해주세요.",
+        };
+    }
+  }
+  return {};
+}
+
+export async function updatePassword(
+  formData: FormData,
+): Promise<ActionResult> {
+  const rawPassword = formData.get("password");
+  const rawConfirm = formData.get("passwordConfirm");
+  const password = typeof rawPassword === "string" ? rawPassword : "";
+  const passwordConfirm = typeof rawConfirm === "string" ? rawConfirm : "";
+
+  if (!password || !passwordConfirm) {
+    return { error: "새 비밀번호를 모두 입력해주세요." };
+  }
+  if (password !== passwordConfirm) {
+    return { error: "비밀번호가 일치하지 않아요." };
+  }
+  if (password.length < MIN_PASSWORD_LENGTH) {
+    return {
+      error: `비밀번호는 ${MIN_PASSWORD_LENGTH}자 이상으로 입력해주세요.`,
+    };
+  }
+
+  const supabase = createClient(await cookies());
+  const { error } = await supabase.auth.updateUser({ password });
+  if (error) {
+    switch (error.code) {
+      case "same_password":
+        return { error: "이전과 다른 비밀번호를 입력해주세요." };
+      case "weak_password":
+        return {
+          error: `비밀번호는 ${MIN_PASSWORD_LENGTH}자 이상으로 입력해주세요.`,
+        };
+      case "session_not_found":
+      case "session_expired":
+      case "bad_jwt":
+        return {
+          error: "링크가 만료되었어요. 비밀번호 찾기를 다시 진행해주세요.",
+        };
+      default:
+        return {
+          error: "비밀번호를 변경하지 못했어요. 잠시 후 다시 시도해주세요.",
+        };
+    }
+  }
+  return {};
 }

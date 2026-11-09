@@ -1,7 +1,7 @@
 import { type NextRequest, NextResponse } from "next/server";
 import { createClient } from "@/utils/supabase/middleware";
 
-// 인덱스, 폴더별, 새 링크 페이지는 로그인한 사용자만 접근할 수 있다.
+// 인덱스, 폴더별, 새 링크, 비밀번호 재설정 페이지는 로그인(또는 재설정 링크로 인증된) 사용자만 접근할 수 있다.
 export async function proxy(request: NextRequest) {
   const { response, user } = await createClient(request);
 
@@ -16,5 +16,5 @@ export async function proxy(request: NextRequest) {
 }
 
 export const config = {
-  matcher: ["/", "/folder/:path*", "/new"],
+  matcher: ["/", "/folder/:path*", "/new", "/reset-password"],
 };
